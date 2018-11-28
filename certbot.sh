@@ -28,8 +28,6 @@ fi
 
 for domain in "${domains[@]}"; do
   if [ -d "$data_path/conf/live/$domain" ]; then
-    path="/etc/letsencrypt/live/$domain"
-
     read -p "There is already folder with $domain domain data, do you want to remove it? (WARNING: removing folder will remove all certbot data for this domain) (Y/n) " decision
     case $decision in
       [Y]* ) rm -rf "$data_path/conf/live/$domain" && mkdir -p "$data_path/conf/live/$domain";;
@@ -40,10 +38,6 @@ for domain in "${domains[@]}"; do
     mkdir -p "$data_path/conf/live/$domain"
   fi
 done
-
-
-echo "### Starting nginx ..."
-docker-compose up -d nginx
 
 
 # Select appropriate email arg
@@ -62,6 +56,9 @@ for domain in "${domains[@]}"; do
   mkdir -p "$path"
   docker-compose run --rm --entrypoint "openssl req -x509 -nodes -newkey rsa:4096 \
   -days 10 -keyout '$path/privkey.pem' -out '$path/fullchain.pem' -subj '/CN=localhost'" certbot
+
+  echo "### Starting nginx ..."
+  docker-compose up -d nginx
 
   echo "### Deleting dummy certificate for $domain domain ..."
   rm -rf "$data_path/conf/live/$domain"
