@@ -53,7 +53,6 @@ for domain in "${domains[@]}"; do
   echo "### Creating dummy certificate for $domain domain..."
 
   path="/etc/letsencrypt/live/$domain"
-  mkdir -p "$path"
   docker-compose run --rm --entrypoint "openssl req -x509 -nodes -newkey rsa:4096 \
   -days 10 -keyout '$path/privkey.pem' -out '$path/fullchain.pem' -subj '/CN=localhost'" certbot
 
@@ -67,5 +66,3 @@ for domain in "${domains[@]}"; do
   docker-compose run --rm --entrypoint "certbot certonly --webroot -w /var/www/certbot -d $domain \
   $staging_arg $email_arg --rsa-key-size $rsa_key_size --agree-tos --force-renewal" certbot
 done
-
-docker-compose stop nginx
