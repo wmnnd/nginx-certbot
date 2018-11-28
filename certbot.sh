@@ -19,7 +19,7 @@ mkdir -p "$data_path/www"
 mkdir -p "$data_path/conf"
 
 
-if [ ! -f "$data_path/conf/options-ssl-nginx.conf" && "$data_path/conf/ssl-dhparams.pem"]; then
+if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] && [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
   echo "### Downloading recommended TLS parameters ..."
   curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/options-ssl-nginx.conf > "$data_path/conf/options-ssl-nginx.conf"
   curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/ssl-dhparams.pem > "$data_path/conf/ssl-dhparams.pem"
@@ -58,7 +58,7 @@ esac
 if [ $staging != "0" ]; then staging_arg="--staging"; fi
 
 for domain in "${domains[@]}"; do
-  echo "### Deleting dummy certificate of $domain domain..."
+  echo "### Deleting dummy certificate for $domain domain ..."
   rm -rf "$data_path/conf/live/$domain"
 
   echo "### Requesting Let's Encrypt certificate for $domain domain ..."
