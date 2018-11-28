@@ -32,9 +32,7 @@ for domain in "${domains[@]}"; do
 
     read -p "There is already folder with $domain domain data, do you want to remove it? (WARNING: removing folder will remove all certbot data for this domain) (Y/n) " decision
     case $decision in
-      [Y]* ) rm -rf "$data_path/conf/live/$domain" && mkdir -p "$data_path/conf/live/$domain" \
-      && docker-compose run --rm --entrypoint "openssl req -x509 -nodes -newkey rsa:4096 \
-        -days 10 -keyout '$path/privkey.pem' -out '$path/fullchain.pem' -subj '/CN=localhost'" certbot;;
+      [Y]* ) rm -rf "$data_path/conf/live/$domain" && mkdir -p "$data_path/conf/live/$domain";;
       [n]* ) domains=(${domains[@]/$domain});;
       * ) echo "Please choose the right variant (Y/n).";;
     esac
@@ -58,6 +56,13 @@ esac
 if [ $staging != "0" ]; then staging_arg="--staging"; fi
 
 for domain in "${domains[@]}"; do
+  echo "### Creating dummy certificate for $domain domain..."
+
+  path="/etc/letsencrypt/live/$domain"
+  mkdir -p "$path"
+  docker-compose run --rm --entrypoint "openssl req -x509 -nodes -newkey rsa:4096 \
+  -days 10 -keyout '$path/privkey.pem' -out '$path/fullchain.pem' -subj '/CN=localhost'" certbot
+
   echo "### Deleting dummy certificate for $domain domain ..."
   rm -rf "$data_path/conf/live/$domain"
 
