@@ -48,7 +48,8 @@ for domain in "${domains[@]}"; do
 done
 
 echo "### Starting nginx ..."
-docker-compose up -d nginx
+# Restarting for case if nginx container is already started
+docker-compose start nginx && docker-compose restart nginx
 
 # Select appropriate email arg
 case "$email" in
