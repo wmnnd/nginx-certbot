@@ -10,17 +10,16 @@ echo "### Preparing directories in $data_path ..."
 if [ -d "$data_path" ]; then
   read -p "There is already folder with certbot data, do you want to remove it? (WARNING: removing folder will remove all data which is stored in the $data_path) (Y/n) " decision
   case $decision in
-    [Y]* ) rm -rf "$data_path";;
+    [Y]* ) rm -rf "$data_path" && mkdir -p "$data_path";;
     [n]* ) ;;
     * ) echo "Please choose the right variant (Y/n).";;
   esac
 fi
-mkdir -p "$data_path/www"
-mkdir -p "$data_path/conf"
 
 
 if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] && [ ! -e "$data_path/conf/ssl-dhparams.pem" ]; then
   echo "### Downloading recommended TLS parameters ..."
+  mkdir -p "$data_path/conf"
   curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot-nginx/certbot_nginx/options-ssl-nginx.conf > "$data_path/conf/options-ssl-nginx.conf"
   curl -s https://raw.githubusercontent.com/certbot/certbot/master/certbot/ssl-dhparams.pem > "$data_path/conf/ssl-dhparams.pem"
 fi
@@ -65,6 +64,7 @@ for domain in "${domains[@]}"; do
   rm -rf "$data_path/conf/live/$domain"
 
   echo "### Requesting Let's Encrypt certificate for $domain domain ..."
+  mkdir -p "$data_path/www"
   docker-compose run --rm --entrypoint "certbot certonly --webroot -w /var/www/certbot -d $domain \
   $staging_arg $email_arg --rsa-key-size $rsa_key_size --agree-tos --force-renewal" certbot
 done
