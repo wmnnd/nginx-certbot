@@ -43,8 +43,8 @@ for domain in "${domains[@]}"; do
   echo "### Creating dummy certificate for $domain domain..."
 
   path="/etc/letsencrypt/live/$domain"
-  docker-compose run --rm --entrypoint "openssl req -x509 -nodes -newkey rsa:4096 \
-  -days 10 -keyout '$path/privkey.pem' -out '$path/fullchain.pem' -subj '/CN=localhost'" certbot
+  docker-compose run --rm --entrypoint "openssl req -x509 -nodes -newkey rsa:1024 \
+  -days 1 -keyout '$path/privkey.pem' -out '$path/fullchain.pem' -subj '/CN=localhost'" certbot
 done
 
 echo "### Starting nginx ..."
