@@ -40,6 +40,17 @@ for domain in "${domains[@]}"; do
 done
 
 
+for domain in "${domains[@]}"; do
+  echo "### Creating dummy certificate for $domain domain..."
+
+  path="/etc/letsencrypt/live/$domain"
+  docker-compose run --rm --entrypoint "openssl req -x509 -nodes -newkey rsa:4096 \
+  -days 10 -keyout '$path/privkey.pem' -out '$path/fullchain.pem' -subj '/CN=localhost'" certbot
+done
+
+echo "### Starting nginx ..."
+docker-compose up -d nginx
+
 # Select appropriate email arg
 case "$email" in
   "") email_arg="--register-unsafely-without-email" ;;
@@ -50,15 +61,6 @@ esac
 if [ $staging != "0" ]; then staging_arg="--staging"; fi
 
 for domain in "${domains[@]}"; do
-  echo "### Creating dummy certificate for $domain domain..."
-
-  path="/etc/letsencrypt/live/$domain"
-  docker-compose run --rm --entrypoint "openssl req -x509 -nodes -newkey rsa:4096 \
-  -days 10 -keyout '$path/privkey.pem' -out '$path/fullchain.pem' -subj '/CN=localhost'" certbot
-
-  echo "### Starting nginx ..."
-  docker-compose up -d nginx
-
   echo "### Deleting dummy certificate for $domain domain ..."
   rm -rf "$data_path/conf/live/$domain"
 
