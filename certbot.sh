@@ -67,4 +67,5 @@ for domain in "${domains[@]}"; do
   mkdir -p "$data_path/www"
   docker-compose run --rm --entrypoint "certbot certonly --webroot -w /var/www/certbot -d $domain \
   $staging_arg $email_arg --rsa-key-size $rsa_key_size --agree-tos --force-renewal" certbot
+  docker-compose exec nginx "/bin/sh -c 'nginx -s reload'"
 done
