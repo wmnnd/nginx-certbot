@@ -6,6 +6,11 @@ data_path="./data/certbot"
 email="" # Adding a valid address is strongly recommended
 staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
 
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run init-letsencrypt.sh as root." && exit
+fi
+
+
 echo "### Preparing directories in $data_path ..."
 if [ -d "$data_path" ]; then
   read -p "There is already folder with certbot data, do you want to remove it? (WARNING: removing folder will remove all data which is stored in the $data_path) (Y/n) " decision
