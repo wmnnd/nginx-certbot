@@ -7,7 +7,12 @@ email="" # Adding a valid address is strongly recommended
 staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
 
 if [ "$EUID" -ne 0 ]; then
-  echo "Please run init-letsencrypt.sh as root." && exit
+  read -p "You executed this script without root privileges, do you want to continue? (WARNING: script won't be able to delete generated Let's Encrypt TLS certificates) (Y/n) " decision
+  case $decision in
+    [Y]* ) ;;
+    [n]* ) exit;;
+    * ) echo "Please choose the right variant (Y/n).";;
+  esac
 fi
 
 
