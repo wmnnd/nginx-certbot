@@ -22,32 +22,34 @@ if [ ! -e "$data_path/conf/options-ssl-nginx.conf" ] || [ ! -e "$data_path/conf/
   echo
 fi
 
-
-for domain in "${domains[@]}"; do
-  if [ -d "$data_path/conf/live/$domain" ]; then
-    read -p "There is already folder with $domain domain data, do you want to remove it? (WARNING: removing folder will remove all certbot data for this domain) (Y/n) " decision
-    case $decision in
-      [Y]* ) rm -rf "$data_path/conf/live/$domain" && mkdir -p "$data_path/conf/live/$domain";;
-      [n]* ) domains=(${domains[@]/$domain});;
-      * ) echo "Please choose the right variant (Y/n).";;
-    esac
-  else
-    mkdir -p "$data_path/conf/live/$domain"
-  fi
-done
+echo "### Creating dummy certificate for $domains ..."
+path="/etc/letsencrypt/live/$domains"
+mkdir -p "$data_path/conf/live/$domains"
+docker-compose run --rm --entrypoint "\
+  openssl req -x509 -nodes -newkey rsa:1024 -days 1\
+    -keyout '$path/privkey.pem' \
+    -out '$path/fullchain.pem' \
+    -subj '/CN=localhost'" certbot
+echo
 
 
-for domain in "${domains[@]}"; do
-  echo "### Creating dummy certificate for $domain domain..."
 
-  path="/etc/letsencrypt/live/$domain"
-  docker-compose run --rm --entrypoint "openssl req -x509 -nodes -newkey rsa:1024 \
-  -days 1 -keyout '$path/privkey.pem' -out '$path/fullchain.pem' -subj '/CN=localhost'" certbot
-done
+echo "### Deleting dummy certificate for $domains ..."
+docker-compose run --rm --entrypoint "\
+  rm -Rf /etc/letsencrypt/live/$domains && \
+  rm -Rf /etc/letsencrypt/archive/$domains && \
+  rm -Rf /etc/letsencrypt/renewal/$domains.conf" certbot
+echo
+
 
 echo "### Starting nginx ..."
 # Restarting for case if nginx container is already started
 docker-compose up -d nginx && docker-compose restart nginx
+echo "### Requesting Let's Encrypt certificate for $domains ..."
+#Join $domains to -d args
+domain_args=""
+for domain in "${domains[@]}"; do
+  domain_args="$domain_args -d $domain"
 
 # Select appropriate email arg
 case "$email" in
@@ -58,14 +60,14 @@ esac
 # Enable staging mode if needed
 if [ $staging != "0" ]; then staging_arg="--staging"; fi
 
-for domain in "${domains[@]}"; do
-  echo "### Deleting dummy certificate for $domain domain ..."
-  rm -rf "$data_path/conf/live/$domain"
-
-  echo "### Requesting Let's Encrypt certificate for $domain domain ..."
-  mkdir -p "$data_path/www"
-  docker-compose run --rm --entrypoint "certbot certonly --webroot -w /var/www/certbot -d $domain \
-  $staging_arg $email_arg --rsa-key-size $rsa_key_size --agree-tos --force-renewal" certbot
-done
+docker-compose run --rm --entrypoint "\
+  certbot certonly --webroot -w /var/www/certbot \
+    $staging_arg \
+    $email_arg \
+    $domain_args \
+    --rsa-key-size $rsa_key_size \
+    --agree-tos \
+    --force-renewal" certbot
+echo
 
 docker-compose exec nginx nginx -s reload
