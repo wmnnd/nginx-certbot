@@ -33,6 +33,9 @@ docker-compose run --rm --entrypoint "\
 echo
 
 
+echo "### Starting nginx ..."
+docker-compose up --force-recreate -d nginx
+echo
 
 echo "### Deleting dummy certificate for $domains ..."
 docker-compose run --rm --entrypoint "\
@@ -42,9 +45,6 @@ docker-compose run --rm --entrypoint "\
 echo
 
 
-echo "### Starting nginx ..."
-# Restarting for case if nginx container is already started
-docker-compose up -d nginx && docker-compose restart nginx
 echo "### Requesting Let's Encrypt certificate for $domains ..."
 #Join $domains to -d args
 domain_args=""
