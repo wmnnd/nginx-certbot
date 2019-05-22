@@ -39,9 +39,9 @@ echo
 
 echo "### Deleting dummy certificate for $domains ..."
 docker-compose run --rm --entrypoint "\
-  rm -Rf /etc/letsencrypt/live/$domains && \
-  rm -Rf /etc/letsencrypt/archive/$domains && \
-  rm -Rf /etc/letsencrypt/renewal/$domains.conf" certbot
+  rm -rf /etc/letsencrypt/live/$domains && \
+  rm -rf /etc/letsencrypt/archive/$domains && \
+  rm -rf /etc/letsencrypt/renewal/$domains.conf" certbot
 echo
 
 
