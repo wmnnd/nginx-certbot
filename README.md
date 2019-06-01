@@ -18,14 +18,13 @@ application.
 - Add domains and email addresses to init-letsencrypt.sh
 - Replace all occurrences of example.org with primary domain (the first one you added to init-letsencrypt.sh) in data/nginx/app.conf
 
-4. Run init the script:
-```
-chmod +x ./init-letsencrypt.sh
-./init-letsencrypt.sh
-```
+4. Run the init script:
 
-5. Run server:
-`docker-compose up`
+        ./init-letsencrypt.sh
+
+5. Run the server:
+
+        docker-compose up
 
 ## Got questions?
 Feel free to post questions in the comment section of the [accompanying guide](https://medium.com/@pentacent/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71)
