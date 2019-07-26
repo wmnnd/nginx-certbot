@@ -13,7 +13,10 @@ services:
       - "443:443"
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
   certbot:
-    image: certbot/certbot
+    image: certbot/certbot:v0.36.0
+    context: 'https://github.com/certbot-docker/certbot-docker.git#v0.36.0:core'
+    args:
+      - CERTBOT_VERSION=0.36.0
     restart: unless-stopped
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
