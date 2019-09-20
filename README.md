@@ -26,6 +26,16 @@ application.
 
         docker-compose up
 
+## For multiple domains
+1. Modify configuration:
+- Add domains seperated by space to init-letsencrypt.sh
+- create new configuration file for every domain under nginx folder (similar to existing app.conf)
+- change the "server_name" in every configuration file to the respective domain name
+- NOTE: do not change the domain name in the certificate path. It should always be the first one you added to init-letsencrypt.sh
+
+2. Run the init script:
+        ./init-letsencrypt.sh
+
 ## Got questions?
 Feel free to post questions in the comment section of the [accompanying guide](https://medium.com/@pentacent/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71)
 
