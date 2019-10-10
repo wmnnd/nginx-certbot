@@ -16,6 +16,7 @@ application.
 
 3. Modify configuration:
 - Add domains and email addresses to init-letsencrypt.sh
+- Specify if you want to subscribe to EFF mailings
 - Replace all occurrences of example.org with primary domain (the first one you added to init-letsencrypt.sh) in data/nginx/app.conf
 
 4. Run the init script:
