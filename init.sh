@@ -5,7 +5,15 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-domains=(example.org www.example.org)
+# import env variables from .env
+set -a
+. ./.env
+set +a
+
+# create nginx config file from template
+sed -e 's+$DOMAIN_NAME+'$DOMAIN_NAME'+g' -e 's+$SERVER_URL+'$SERVER_URL'+g' ./data/nginx/app.conf.template > ./data/nginx/app.conf
+
+domains=($DOMAIN_NAME)
 rsa_key_size=4096
 data_path="./data/certbot"
 email="" # Adding a valid address is strongly recommended
