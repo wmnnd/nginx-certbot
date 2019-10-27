@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 domains=(example.com www.example.com) # Specify domains here or use the -d argument
 data_path="./data/certbot" # Specify data path here or use the --data-path argument
