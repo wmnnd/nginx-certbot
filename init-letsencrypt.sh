@@ -6,6 +6,7 @@ data_path="./data/certbot" # Specify data path here or use the --data-path argum
 email="" # Specify email here or use the --email argument
 staging=0 # Set to 1 here or use the --staging argument
 rsa_key_size=4096
+docker_compose_in_docker=0 # Set to 1 here or use --docker-compose-in-docker argument
 
 print_help() {
   echo "Usage: `basename $0` [-d DOMAIN] [--staging] [-f COMPOSE_FILE] [--data-path PATH]"
@@ -13,12 +14,13 @@ print_help() {
   echo "You can either modify `basename $0` directly or use the following options to adjust its behavior."
   echo ""
   echo "Options:"
-  echo "-h, --help:          Print this help."
-  echo "-d, --domain DOMAIN: Request certificates for the given DOMAIN. Can be used multiple times (e.g. -d example.com -d www.example.com)."
-  echo "-f, --file PATH:     If given, use specified docker-compose configuration file."
-  echo "-m, --email EMAIL:   If given, use EMAIL to registert Let's Encrypt account"
-  echo "--staging:           Use Let's Encrypt in Staging Mode"
-  echo "--data-path:         Set path for storing certificate data"
+  echo "-h, --help:                         Print this help."
+  echo "-d, --domain DOMAIN:                Request certificates for the given DOMAIN. Can be used multiple times (e.g. -d example.com -d www.example.com)."
+  echo "-f, --file PATH:                    If given, use specified docker-compose configuration file."
+  echo "-m, --email EMAIL:                  If given, use EMAIL to registert Let's Encrypt account"
+  echo "--staging:                          Use Let's Encrypt in Staging Mode"
+  echo "--data-path:                        Set path for storing certificate data"
+  echo "--docker-compose-in-docker:         If passed, we run docker-compose as a container in docker. This option is useful in environments that prohibit you from installing docker-compose (e.g. Container-Optimized-OS VMs from GCP)"
 }
 
 while [[ $# -gt 0 ]]; do
@@ -48,12 +50,24 @@ while [[ $# -gt 0 ]]; do
       data_path="$2"
       shift; shift
       ;;
+    --docker-compose-in-docker|--dc-in-d)
+      docker_compose_in_docker=1
+      shift;
+      ;;
     *)
       echo "Unknown argument: $1"
       exit
       ;;
   esac
 done
+
+function dc() {
+  if [ $docker_compose_in_docker != "0" ]; then
+    docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:$PWD" -w="$PWD" docker/compose:1.24.0 "$@"
+  else
+    docker-compose "$@"
+  fi
+}
 
 # Make sure at least one domain has been configured
 if [ "${domains[0]}" == "example.com" ] || [ "${domains[0]}" == "" ]; then
@@ -89,7 +103,7 @@ fi
 echo "### Creating dummy certificate for $domains ..."
 path="/etc/letsencrypt/live/all"
 mkdir -p "$data_path/conf/live/all"
-docker-compose ${compose_file_arg} run --rm --entrypoint "\
+dc ${compose_file_arg} run --rm --entrypoint "\
   openssl req -x509 -nodes -newkey rsa:1024 -days 1 \
     -keyout '$path/privkey.pem' \
     -out '$path/fullchain.pem' \
@@ -98,12 +112,12 @@ echo
 
 # Start nginx
 echo "### Starting nginx ..."
-docker-compose ${compose_file_arg} up --force-recreate --no-deps -d nginx
+dc ${compose_file_arg} up --force-recreate --no-deps -d nginx
 echo
 
 # Delete dummy certificate
 echo "### Deleting dummy certificate for $domains ..."
-docker-compose ${compose_file_arg} run --rm --entrypoint "\
+dc ${compose_file_arg} run --rm --entrypoint "\
   rm -Rf /etc/letsencrypt/live/all && \
   rm -Rf /etc/letsencrypt/archive/all && \
   rm -Rf /etc/letsencrypt/renewal/all.conf" certbot
@@ -126,7 +140,7 @@ esac
 # Enable staging mode if requested
 if [ $staging != "0" ]; then staging_arg="--staging"; fi
 
-docker-compose ${compose_file_arg} run --rm --entrypoint "\
+dc ${compose_file_arg} run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \
     ${staging_arg} \
     ${email_arg} \
@@ -139,4 +153,4 @@ echo
 
 # Reload nginx
 echo "### Reloading nginx ..."
-docker-compose ${compose_file_arg} exec nginx nginx -s reload
+dc ${compose_file_arg} exec nginx nginx -s reload
