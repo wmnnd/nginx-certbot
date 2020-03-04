@@ -17,6 +17,9 @@ application.
 3. Modify configuration:
 - Add domains and email addresses to init-letsencrypt.sh
 - Replace all occurrences of example.org with primary domain (the first one you added to init-letsencrypt.sh) in data/nginx/app.conf
+- You can replace all instances of example.org with the command:
+
+        perl -pi -e 's/example.org/mydomain.com/' data/nginx/app.conf init-letsencrypt.sh
 
 4. Run the init script:
 
