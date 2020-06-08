@@ -1,3 +1,7 @@
-!/data/certbot/conf/options-ssl-nginx.conf
-!/data/certbot/conf/ssl-dhparams.pem
-/data/certbot/**/*
+/data/certbot/
+
+!options-ssl-nginx.conf
+!ssl-dhparams.pem
+# ...even if they are in subdirectories
+!*/
+
