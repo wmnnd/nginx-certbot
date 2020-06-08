@@ -1,3 +1,3 @@
-!/data/certbot/options-ssl-nginx.conf
-!/data/certbot/ssl-dhparams.pem
+!/data/certbot/conf/options-ssl-nginx.conf
+!/data/certbot/conf/ssl-dhparams.pem
 /data/certbot
