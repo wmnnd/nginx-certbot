@@ -2,8 +2,15 @@ version: '3'
 
 services:
   nginx:
-    image: nginx:1.15-alpine
+    build:
+      context: ./data/nginx
+      dockerfile: Dockerfile
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost"]
+      interval: 45s
+      timeout: 5s
+      retries: 3
     volumes:
       - ./data/nginx/conf.d:/etc/nginx/conf.d
       - ./data/certbot/conf:/etc/letsencrypt
@@ -12,9 +19,13 @@ services:
       - "80:80"
       - "443:443"
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
   certbot:
     image: certbot/certbot
     restart: unless-stopped
+    depends_on:
+      nginx:
+        condition: service_healthy
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
