@@ -1,0 +1,39 @@
+# vim:sw=4:ts=4:et:ft=nginx
+
+server {
+    listen 80;
+    server_name ${nginx_domain};
+    server_tokens off;
+
+    location /nginx/reload {
+        auth_basic 'Access restriction';
+        auth_basic_user_file /tmp/.htpasswd;
+        proxy_pass http://localhost:9000;
+    }
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name ${nginx_domain};
+    server_tokens off;
+
+    ssl_certificate /etc/letsencrypt/live/${nginx_domain}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${nginx_domain}/privkey.pem;
+    include /etc/nginx/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/nginx/letsencrypt/ssl-dhparams.pem;
+
+    location / {
+        proxy_pass          http://${nginx_domain};
+        proxy_set_header    Host                $http_host;
+        proxy_set_header    X-Real-IP           $remote_addr;
+        proxy_set_header    X-Forwarded-For     $proxy_add_x_forwarded_for;
+    }
+}
