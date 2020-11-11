@@ -8,7 +8,7 @@ services:
       - ./data/nginx:/etc/nginx/conf.d
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
-      - ./data/parkingmoinscon-app:/var/www/parkingmoinscon-app
+      - /home/ubuntu/parkingmoinscon-app:/var/www/parkingmoinscon-app
     ports:
       - "80:80"
       - "443:443"
