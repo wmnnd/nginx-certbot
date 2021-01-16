@@ -20,6 +20,12 @@ trap exit TERM
 echo "### Let's nginx bootstrap"
 sleep 10s
 
+# Select appropriate email arg
+case "$email" in
+  "") email_arg="--register-unsafely-without-email" ;;
+  *) email_arg="--email $email" ;;
+esac
+
 if [ ! -f "$path/privkey.pem" ]; then
   echo "### Requesting Let's Encrypt certificate for $domains ..."
 
@@ -29,12 +35,6 @@ if [ ! -f "$path/privkey.pem" ]; then
     domain_args="$domain_args -d $domain"
   done
 
-  # Select appropriate email arg
-  case "$email" in
-    "") email_arg="--register-unsafely-without-email" ;;
-    *) email_arg="--email $email" ;;
-  esac
-
   # Enable staging mode if needed
   if [ $staging != "0" ]; then
     staging_arg="--staging"
@@ -42,7 +42,8 @@ if [ ! -f "$path/privkey.pem" ]; then
     staging_arg=""
   fi
 
-  certbot certonly --webroot -w /var/www/certbot \
+  certbot certonly \
+    --webroot -w /var/www/certbot \
     $staging_arg \
     $email_arg \
     $domain_args \
@@ -55,7 +56,12 @@ if [ ! -f "$path/privkey.pem" ]; then
 fi
 
 while :; do
-  certbot renew
+  certbot renew \
+    --webroot -w /var/www/certbot \
+    $email_arg \
+    --rsa-key-size $rsa_key_size \
+    --agree-tos
+
   curl --fail --silent --user ${nginx_api_user}:${nginx_api_password} http://nginx/nginx/reload
   sleep 12h & wait ${!}
 done
