@@ -5,11 +5,26 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-domains=(example.org www.example.org)
+if [ -f ./.env ]; then
+  source ./.env
+else
+  echo "No .env file found, using defaults."
+fi
+
+
+domains_env="${NGINX_DOMAIN_LIST:-"example.org www.example.org"}"
+IFS=' ' read -r -a domains <<< "$domains_env"
+primary_domain=${domains[0]:-$NGINX_PRIMARY_DOMAIN}
 rsa_key_size=4096
 data_path="./data/certbot"
-email="" # Adding a valid address is strongly recommended
-staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
+email=${LETSENCRYPT_EMAIL:-""} # Adding a valid address is strongly recommended
+staging=${LETSENCRYPT_STAGING:-0} # Set to 1 if you're testing your setup to avoid hitting request limits
+proxy_pass=${NGINX_PROXY_PASS:-"http://example.org"}
+escaped_proxy_pass=$(printf '%s\n' "$proxy_pass" | sed -e 's/[\/&]/\\&/g')
+
+echo "### Creating nginx app.conf from template ..."
+sed "s/\${NGINX_DOMAIN_LIST}/${domains_env}/g; s/\${NGINX_PRIMARY_DOMAIN}/${primary_domain}/g; s/\${NGINX_PROXY_PASS}/${escaped_proxy_pass}/g" ./templates/nginx/app.conf.template > ./data/nginx/app.conf
+echo
 
 if [ -d "$data_path" ]; then
   read -p "Existing data found for $domains. Continue and replace existing certificate? (y/N) " decision
