@@ -21,7 +21,7 @@ services:
       - ./data/certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
-  networks:
-    default:
-      external: true
-      name: efficient-guru-docker-compose-network
+networks:
+  default:
+    external: true
+    name: efficient-guru-docker-compose-network
