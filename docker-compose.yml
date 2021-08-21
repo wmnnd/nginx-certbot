@@ -12,6 +12,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "8443:8443"
+      - "58443:58443"
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
   certbot:
     image: certbot/certbot
