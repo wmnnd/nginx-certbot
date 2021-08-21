@@ -2,7 +2,8 @@ version: '3'
 
 services:
   nginx:
-    image: nginx:1.15-alpine
+    # image: nginx:1.15-alpine
+    image: nginx:1.15
     restart: unless-stopped
     volumes:
       - ./data/nginx:/etc/nginx/conf.d
