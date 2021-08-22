@@ -24,10 +24,12 @@ application.
 
 5. Run the server:
 
-        docker-compose up
 
 ## Got questions?
 Feel free to post questions in the comment section of the [accompanying guide](https://medium.com/@pentacent/nginx-and-lets-encrypt-with-docker-in-less-than-5-minutes-b4b8a60d3a71)
 
 ## License
 All code in this repository is licensed under the terms of the `MIT License`. For further information please refer to the `LICENSE` file.
+
+## GOOD READ
+https://stackoverflow.com/questions/24319662/from-inside-of-a-docker-container-how-do-i-connect-to-the-localhost-of-the-mach
