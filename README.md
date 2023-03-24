@@ -24,7 +24,7 @@ application.
 5. Answer prompt questions in terminal
 - Domains, Email, Testing.
 
-5. Run the server:
+6. Run the server:
 
         docker compose up
 
