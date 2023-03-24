@@ -11,6 +11,20 @@ data_path="./data/certbot"
 email="" # Adding a valid address is strongly recommended
 staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
 
+read -p "Enter Domains (with spaces between each domain): " domains
+read -p "Enter email (Adding a valid address is strongly recommended): " email
+read -p "Are you testing(y/N): " -n 1 -r
+
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+	echo
+    staging=1
+fi
+
+echo "Domains: $domains"
+echo "Email: $email"
+echo "Testing: $staging"
+
 if [ -d "$data_path" ]; then
   read -p "Existing data found for $domains. Continue and replace existing certificate? (y/N) " decision
   if [ "$decision" != "Y" ] && [ "$decision" != "y" ]; then
