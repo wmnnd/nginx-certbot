@@ -5,7 +5,32 @@ if ! [ -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-domains=(example.org www.example.org)
+
+# Initialize domain variable
+domain=""
+
+# Parse command-line arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        -d|--domain) domain="$2"; shift ;;
+        *) echo "Unknown parameter: $1"; exit 1 ;;
+    esac
+    shift
+done
+
+# Check if the domain was provided
+if [ -z "$domain" ]; then
+    echo "No domain provided. Use --domain or -d to specify a domain."
+    exit 1
+fi
+
+# Special handling for url.com
+if [ "$domain" = "url.com" ]; then
+    domains=(url.com www.url.com)
+else
+    domains=($domain www.$domain)
+fi
+
 rsa_key_size=4096
 data_path="./data/certbot"
 email="" # Adding a valid address is strongly recommended
