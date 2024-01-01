@@ -24,12 +24,8 @@ if [ -z "$domain" ]; then
     exit 1
 fi
 
-# Special handling for url.com
-if [ "$domain" = "url.com" ]; then
-    domains=(url.com www.url.com)
-else
-    domains=($domain www.$domain)
-fi
+domains=($domain www.$domain)
+
 
 rsa_key_size=4096
 data_path="./data/certbot"
